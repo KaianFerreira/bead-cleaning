@@ -26,15 +26,19 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/assets/*",
               {
                 "glob": "**/*",
                 "input": "public"
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "public/webix.css"
             ],
-            "scripts": []
+            "scripts": [
+              "public/webix.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -85,15 +89,19 @@
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"
               }
             ],
             "styles": [
+              "public/webix.css",
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "public/webix.js"
+            ]
           }
         }
       }
