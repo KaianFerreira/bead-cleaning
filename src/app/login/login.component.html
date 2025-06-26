@@ -18,12 +18,12 @@
 
       <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
         <div class="form-group">
-          <label for="username">👤 Username</label>
+          <label for="login">👤 login</label>
           <input
             type="text"
-            id="username"
-            name="username"
-            [(ngModel)]="credentials.username"
+            id="login"
+            name="login"
+            [(ngModel)]="credentials.login"
             placeholder="Enter your username"
             required
             [disabled]="isLoading"
@@ -64,36 +64,12 @@
         <button
           type="submit"
           class="login-button"
-          [disabled]="isLoading || !credentials.username || !credentials.password"
+          [disabled]="isLoading || !credentials.login || !credentials.password"
         >
           <span *ngIf="!isLoading"> Login</span>
           <span *ngIf="isLoading">⏳ Logging in...</span>
         </button>
       </form>
-
-      <!-- Demo Credentials -->
-      <div class="demo-section">
-        <p class="demo-title">🧪 Demo Credentials:</p>
-        <div class="demo-buttons">
-          <button
-            type="button"
-            class="demo-button admin"
-            (click)="fillDemoCredentials('admin')"
-            [disabled]="isLoading"
-          >
-            👨‍💼 Admin (admin/admin)
-          </button>
-          <button
-            type="button"
-            class="demo-button user"
-            (click)="fillDemoCredentials('user')"
-            [disabled]="isLoading"
-          >
-            👩‍💼 User (user/user)
-          </button>
-        </div>
-      </div>
-    </div>
 
     <!-- Footer -->
     <div class="login-footer">

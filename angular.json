@@ -33,11 +33,11 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/webix/webix.css",
+              "public/webix.css",
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/webix/webix.js"
+              "public/webix.js"
             ]
           },
           "configurations": {

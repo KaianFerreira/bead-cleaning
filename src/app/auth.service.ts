@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { api, setBearerToken as apiSetAuth } from '../app/api/axios';
 
 export interface LoginCredentials {
-  username: string;
+  login: string;
   password: string;
 }
 
@@ -13,7 +12,6 @@ export interface AuthResponse {
   user?: {
     username: string;
     name: string;
-    role?: string;
   };
   token?: string;
   message?: string;
@@ -23,83 +21,104 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = '/api/auth';
   private currentUserSubject = new BehaviorSubject<any>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  setCurrentUser(user: any): void {
+    this.currentUserSubject.next(user);
+  }
 
-  constructor(private http: HttpClient) {
-    // Check if user is already logged in
+  constructor() {
+    // Initialize with stored user data if available
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
+      try {
+        const user = JSON.parse(storedUser);
+        this.currentUserSubject.next(user);
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+      }
+    }
+    // Check if user is already logged in
+    this.checkUser()
+  }
+
+  decodeBearerToken = (token: string): any => {
+    try {
+      const payload = token.split('.')[1];
+      return JSON.parse(atob(payload));
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
     }
   }
 
-  login(credentials: LoginCredentials): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials)
-      .pipe(
-        map(response => {
-          if (response.success && response.user) {
-            // Store user data
-            localStorage.setItem('currentUser', JSON.stringify(response.user));
-            if (response.token) {
-              localStorage.setItem('authToken', response.token);
-            }
-            this.currentUserSubject.next(response.user);
+  async checkUser() {
+    try {
+      const { data } = await api.get('/auth/check-logon');
+      const user = this.decodeBearerToken(data.bearer_token);
+      if (user) {
+        // Store user data
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        localStorage.setItem('authToken', JSON.stringify(data.bearer_token));
+        apiSetAuth(data.bearer_token);
+        this.setCurrentUser(user);
+      } else {
+        this.logout();
+      }
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        const storedToken = localStorage.getItem('authToken')
+        if (storedToken) {
+          const user = this.decodeBearerToken(storedToken);
+          if (user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            apiSetAuth(storedToken);
+            this.setCurrentUser(user);
+          } else {
+            this.logout();
           }
-          return response;
-        }),
-        catchError(error => {
-          console.error('Login error:', error);
-          // Return mock response for demo
-          return of(this.getMockLoginResponse(credentials));
-        })
-      );
+        } else {
+          this.logout();
+        }
+      }
+      console.error('Error checking user:', error);
+    }
+  }
+
+  async login(credentials: LoginCredentials): Promise<boolean> {
+
+    const { data } = await api.post(`/auth/login`, credentials)
+
+    if (data.message === 'Login successful' && data.bearer_token) {
+      // Store user data
+      localStorage.setItem('authToken', data.bearer_token);
+      apiSetAuth(data.bearer_token);
+      const user = this.decodeBearerToken(data.bearer_token);
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      this.setCurrentUser(user);
+    }
+    return true;
   }
 
   logout(): void {
     // Clear stored data
     localStorage.removeItem('currentUser');
     localStorage.removeItem('authToken');
-    this.currentUserSubject.next(null);
-  }
-
-  isLoggedIn(): boolean {
-    return this.currentUserSubject.value !== null;
-  }
-
-  getCurrentUser(): any {
-    return this.currentUserSubject.value;
-  }
-
-  // Mock login response for demo purposes
-  private getMockLoginResponse(credentials: LoginCredentials): AuthResponse {
-    // Simulate API delay
-    if (credentials.username === 'admin' && credentials.password === 'admin') {
-      return {
-        success: true,
-        user: {
-          username: 'AE04085',
-          name: 'João Silva',
-          role: 'Operator'
-        },
-        token: 'mock-jwt-token-12345'
-      };
-    } else if (credentials.username === 'user' && credentials.password === 'user') {
-      return {
-        success: true,
-        user: {
-          username: 'AE04086',
-          name: 'Maria Santos',
-          role: 'Operator'
-        },
-        token: 'mock-jwt-token-67890'
-      };
-    } else {
-      return {
-        success: false,
-        message: 'Invalid username or password'
-      };
+    // Clear user data
+    this.setCurrentUser(null);
+    // Clear API authentication
+    apiSetAuth('');
+    // Redirect to login page
+    // Check if not already on login page
+    if (!window.location.pathname.includes('/login')) {
+      window.location.href = '/login';
     }
+  }
+
+  getCurrentUser$(): Observable<any> {
+    return this.currentUserSubject.asObservable();
+  }
+  isLoggedIn(): boolean {
+    const user = this.currentUserSubject.value;
+    return !!user && !!user.logon_username;
   }
 }

@@ -13,7 +13,7 @@ import { AuthService, LoginCredentials } from '../auth.service';
 })
 export class LoginComponent implements OnInit {
   credentials: LoginCredentials = {
-    username: '',
+    login: '',
     password: ''
   };
 
@@ -33,8 +33,8 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  onSubmit(): void {
-    if (!this.credentials.username || !this.credentials.password) {
+  async onSubmit(): Promise<void> {
+    if (!this.credentials.login || !this.credentials.password) {
       this.errorMessage = 'Please enter both username and password';
       return;
     }
@@ -42,35 +42,24 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.login(this.credentials).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        if (response.success) {
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.errorMessage = response.message || 'Login failed';
-        }
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = 'Connection error. Please try again.';
-        console.error('Login error:', error);
+    try {
+      const response = await this.authService.login(this.credentials)
+      this.isLoading = false;
+      if (response) {
+        console.log('here')
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.errorMessage = 'Login failed'; 
       }
-    });
+    } catch (error) {
+      this.isLoading = false;
+      this.errorMessage = 'Connection error. Please try again.';
+      console.error('Login error:', error);
+    }
   }
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
-  // Demo credentials for quick testing
-  fillDemoCredentials(type: 'admin' | 'user'): void {
-    if (type === 'admin') {
-      this.credentials.username = 'admin';
-      this.credentials.password = 'admin';
-    } else {
-      this.credentials.username = 'user';
-      this.credentials.password = 'user';
-    }
-  }
 }

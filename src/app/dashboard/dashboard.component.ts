@@ -1,6 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BarcodeService, BarcodeData, User } from '../barcode.service';
+import { BeadCleaningService, BarcodeData, User } from '../beadCleaning.service';
 import { AuthService } from '../auth.service';
 
 declare var webix: any;
@@ -18,14 +18,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private webixApp: any;
   private barcodeData: BarcodeData[] = [];
-  
+
   // Logged user
-  loggedUser: User = {
-    username: 'AE04085',
-    name: 'João Silva',
-    role: 'Operator'
+  public loggedUser: User = {
+    username: '',
+    name: ''
   };
-  
+
   // Current date formatted for header
   currentDate = new Date().toLocaleDateString("en-US", {
     weekday: 'long',
@@ -35,9 +34,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
 
   constructor(
-    private barcodeService: BarcodeService,
+    private beadCleaningService: BeadCleaningService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.currentDate = new Date().toLocaleDateString('en-US', {
@@ -48,14 +47,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
 
     // Get user from auth service
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      this.loggedUser = {
-        username: currentUser.username,
-        name: currentUser.name,
-        role: currentUser.role || 'Operator'
-      };
-    }
+    this.authService.getCurrentUser$().subscribe(user => {
+      if (user) {
+        this.loggedUser = {
+          username: user.logon_username,
+          name: user.logon_description,
+        };
+      }
+    });
+
 
     this.loadBarcodeData();
     this.initWebix();
@@ -74,46 +74,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // Method to load barcode data from API
-  private loadBarcodeData() {
-    this.barcodeService.getBarcodes().subscribe({
-      next: (data) => {
-        this.barcodeData = data;
-        this.updateTable();
-      },
-      error: (error) => {
-        console.log('Using mock barcode data:', error);
-        this.barcodeData = this.barcodeService.getMockBarcodes();
-        this.updateTable();
-      }
-    });
+  private async loadBarcodeData() {
+    try {
+      const barcodes = await this.beadCleaningService.getBarcodes()
+      this.barcodeData = barcodes || [];
+      this.updateTable();
+    } catch (error) {
+      console.error('Error loading barcode data:', error);
+      const webix = (window as any).webix;
+      webix.message({
+        text: "⚠️ Error loading barcode data",
+        type: "error",
+        expire: 3000
+      });
+    }
   }
 
   // Method to send new barcode to API
-  private sendBarcodeToAPI(barcodeData: BarcodeData) {
+  private async sendBarcodeToAPI(barcodeData: BarcodeData) {
     const webix = (window as any).webix;
-    
-    this.barcodeService.submitBarcode(barcodeData).subscribe({
-      next: (response) => {
-        console.log('Barcode sent successfully:', response);
-        this.loadBarcodeData(); // Reload data
-        webix.message({
-          text: `✅ Barcode ${barcodeData.barcode} sent successfully!`,
-          type: "success",
-          expire: 3000
-        });
-      },
-      error: (error) => {
-        console.error('Error sending barcode:', error);
-        webix.message({
-          text: "⚠️ Error sending barcode to server, but saved locally",
-          type: "warning",
-          expire: 3000
-        });
-        // Add locally even with error
-        this.barcodeData.unshift(barcodeData);
-        this.updateTable();
-      }
-    });
+    try {
+      const response = await this.beadCleaningService.submitBarcode(barcodeData)
+      console.log('Barcode sent successfully:', response);
+      this.loadBarcodeData(); // Reload data
+      webix.message({
+        text: `✅ Barcode ${barcodeData.barcode} sent successfully!`,
+        type: "success",
+        expire: 3000
+      });
+    } catch (error) {
+      console.error('Error preparing barcode data:', error);
+      webix.message({
+        text: "⚠️ Error sending barcode to server, but saved locally",
+        type: "warning",
+        expire: 3000
+      });
+      // Add l
+      return;
+    }
+
   }
 
   // Method to update table
@@ -144,7 +143,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const newEntry: BarcodeData = {
       username: this.loggedUser.username,
       barcode: barcode,
-      createdAt: new Date().toLocaleString("en-US", {
+      created_at: new Date().toLocaleString("en-US", {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -152,7 +151,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         minute: '2-digit',
         second: '2-digit'
       }),
-      status: "Processed"
     };
 
     // Send to API
@@ -160,14 +158,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // Clear field
     barcodeInput.setValue("");
-    
+
     // Focus field again
     barcodeInput.focus();
   }
 
   private initWebix() {
     const webix = (window as any).webix;
-    
+
     if (!webix) {
       console.error('Webix is not loaded');
       return;
@@ -209,14 +207,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
           columns: [
             { id: "username", header: "User", fillspace: true, sort: "string", width: "100" },
             { id: "barcode", header: "Barcode", fillspace: true, sort: "string", width: "200" },
-            { id: "createdAt", header: "Date/Time", fillspace: true, sort: "date", width: "250" },
+            { id: "created_at", header: "Date/Time", fillspace: true, sort: "date", width: "250" },
           ],
           data: this.barcodeData,
-          select: "row",
-          css: "webix_data_border webix_header_border",
           autoheight: true,
           autowidth: true,
-          height: '100%',
+          pager: 'pagerA',
+        },
+        {
+          view:"pager",
+          id:"pagerA",
+          template:"{common.prev()} {common.pages()} {common.next()}",
+          size:10,
+          group:5
         }
       ]
     });
