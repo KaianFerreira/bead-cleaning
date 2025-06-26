@@ -1,1 +1,169 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Goodyear Theme Colors */
+:root {
+  --goodyear-blue: #003399;
+  --goodyear-yellow: #FFD100;
+  --goodyear-blue-light: #0044CC;
+  --goodyear-blue-dark: #002266;
+  --goodyear-yellow-light: #FFE066;
+  --goodyear-yellow-dark: #E6B800;
+  --white: #FFFFFF;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, var(--goodyear-blue) 0%, var(--goodyear-blue-light) 100%);
+  min-height: 100vh;
+  color: var(--gray-900);
+  line-height: 1.6;
+}
+
+/* Webix Custom Theme */
+.webix_view {
+  font-family: 'Inter', sans-serif !important;
+}
+
+.webix_header {
+  background: var(--goodyear-blue) !important;
+  color: var(--white) !important;
+  border-color: var(--goodyear-yellow) !important;
+  font-weight: 600 !important;
+}
+
+.webix_toolbar {
+  background: var(--goodyear-blue) !important;
+  border-color: var(--goodyear-yellow) !important;
+}
+
+.webix_toolbar .webix_el_label {
+  color: var(--white) !important;
+  font-weight: 500 !important;
+}
+
+.webix_button {
+  background: var(--goodyear-yellow) !important;
+  color: var(--goodyear-blue) !important;
+  border: 2px solid var(--goodyear-blue) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 4px rgba(0, 51, 153, 0.2) !important;
+}
+
+.webix_button:hover {
+  background: var(--goodyear-yellow-light) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0, 51, 153, 0.3) !important;
+}
+
+.webix_button:active {
+  transform: translateY(0) !important;
+}
+
+.webix_text {
+  border: 2px solid var(--gray-200) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  transition: border-color 0.3s ease !important;
+}
+
+.webix_text:focus {
+  border-color: var(--goodyear-blue) !important;
+  box-shadow: 0 0 0 3px rgba(0, 51, 153, 0.1) !important;
+}
+
+.webix_datatable {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.webix_datatable .webix_cell {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid var(--gray-100) !important;
+}
+
+.webix_datatable .webix_row:nth-child(even) {
+  background: var(--gray-50) !important;
+}
+
+.webix_datatable .webix_row:hover {
+  background: rgba(255, 209, 0, 0.1) !important;
+}
+
+.webix_template {
+  background: var(--white) !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.webix_template h2 {
+  color: var(--goodyear-blue) !important;
+  font-weight: 700 !important;
+  margin-bottom: 16px !important;
+}
+
+/* Custom Container Styles */
+.webix-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  margin: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .webix-container {
+    margin: 10px;
+    border-radius: 12px;
+  }
+  
+  .webix_datatable .webix_cell {
+    padding: 8px 12px !important;
+  }
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}

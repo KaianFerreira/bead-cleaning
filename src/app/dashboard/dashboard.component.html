@@ -1,0 +1,31 @@
+<!-- Fixed Header with Goodyear Logo and User -->
+<header class="fixed-header">
+  <div class="header-content">
+    <div class="logo-section">
+      <div class="goodyear-logo">
+        <img src="assets/goodyear-logo.png" alt="Goodyear" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span style="display: none; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 28px; color: #FFD100; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); letter-spacing: 3px;">GOODYEAR</span>
+      </div>
+      <div class="logo-subtitle">AERO Bead Cleaning</div>
+    </div>
+    <div class="user-section">
+      <div class="user-info">
+        <div class="user-name">{{ loggedUser.name }}</div>
+        <div class="user-details">
+          <span class="username">{{ loggedUser.username }}</span>
+          <button class="logout-button" (click)="logout()"> Logout</button>
+        </div>
+      </div>
+    </div>
+    <div class="header-date">
+      {{ currentDate }}
+    </div>
+  </div>
+</header>
+
+<!-- Main container with margin for fixed header -->
+<div class="app-container">
+  <div class="content-wrapper">
+    <div #webixContainer class="webix-container fade-in"></div>
+  </div>
+</div>
