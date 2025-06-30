@@ -32,7 +32,6 @@ export class BeadCleaningService {
       JAN: "01", FEB: "02", MAR: "03", APR: "04", MAY: "05", JUN: "06",
       JUL: "07", AUG: "08", SEP: "09", OCT: "10", NOV: "11", DEC: "12"
     };
-
     // Convert time part to standard format
     let [hour, minute, second] = timePart.split(".");
     hour = parseInt(hour, 10);
@@ -40,6 +39,7 @@ export class BeadCleaningService {
     // Convert to 24-hour format
     if (period === "PM" && hour !== 12) hour += 12;
     if (period === "AM" && hour === 12) hour = 0;
+
     hour = hour.toString().padStart(2, '0');
 
     // Full year from 2-digit year (assuming 2000s)

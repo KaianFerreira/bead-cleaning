@@ -70,7 +70,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout();
     // Redirect to login page
-    window.location.href = '/login';
   }
 
   // Method to load barcode data from API

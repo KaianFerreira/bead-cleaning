@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { RouterService } from './router.service';
 
 @Component({
   selector: 'app-root',
@@ -10,5 +11,6 @@ import { RouterOutlet } from '@angular/router';
   imports: [CommonModule, RouterOutlet]
 })
 export class AppComponent {
+  constructor(private routerService: RouterService) {};
   title = 'AERO Bead Cleaning - Goodyear';
 }

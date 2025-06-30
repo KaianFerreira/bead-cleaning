@@ -46,15 +46,22 @@ export class LoginComponent implements OnInit {
       const response = await this.authService.login(this.credentials)
       this.isLoading = false;
       if (response) {
-        console.log('here')
         this.router.navigate(['/dashboard']);
       } else {
         this.errorMessage = 'Login failed'; 
       }
     } catch (error) {
       this.isLoading = false;
-      this.errorMessage = 'Connection error. Please try again.';
-      console.error('Login error:', error);
+      if (error instanceof Error && 'status' in error) {
+        const httpError = error as any;
+        if (httpError.status === 401) {
+          this.errorMessage = 'Invalid credentials';
+        } else if (httpError.status === 400) {
+          this.errorMessage = 'Internal error';
+        } else {
+          this.errorMessage = 'Connection error. Please try again.';
+        }
+      }
     }
   }
 
