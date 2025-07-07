@@ -2,7 +2,7 @@ import { RouterService } from '../router.service';
 import axios from 'axios';
 
 export const api = axios.create({
-    baseURL: 'http://163.243.60.82/slim-webapi',
+    baseURL: 'http://akrgmitcti002.na.goodyear.com/slim-webapi',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -41,7 +41,7 @@ const setAuthHeader = (config: any) => {
 
 api.interceptors.request.use(setAuthHeader)
 
-api.defaults.withCredentials = true;
+// api.defaults.withCredentials = true;
 
 api.interceptors.request.use(
     setAuthHeader,

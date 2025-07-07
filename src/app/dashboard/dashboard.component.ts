@@ -18,7 +18,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private webixApp: any;
   private barcodeData: BarcodeData[] = [];
-
+  private focusInterval: any;
   // Logged user
   public loggedUser: User = {
     username: '',
@@ -56,6 +56,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.focusInterval = setInterval(() => {
+      this.focusBarcodeInput();
+    }, 2000)
 
     this.loadBarcodeData();
     this.initWebix();
@@ -65,6 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.webixApp) {
       this.webixApp.destructor();
     }
+    clearInterval(this.focusInterval);
   }
 
   logout() {
@@ -72,6 +76,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Redirect to login page
   }
 
+  private focusBarcodeInput() {
+    const webix = (window as any).webix;
+    const barcodeInput = webix.$$("barcodeInput");
+    if (barcodeInput) {
+      barcodeInput.focus();
+    }
+  }
   // Method to load barcode data from API
   private async loadBarcodeData() {
     try {
